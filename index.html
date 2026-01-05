@@ -42,27 +42,49 @@
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     
     <script>
-      // 1. Register a component to control audio playback
+      // COMPONENT 1: The Logic to Play/Stop Sound
       AFRAME.registerComponent('sound-controller', {
         init: function () {
           const target = this.el;
           
-          // Play audio when target is found
           target.addEventListener('targetFound', () => {
+            console.log("Target Found: Playing Audio"); // Debug message
             const soundEntity = document.querySelector('#soundEntity');
             if (soundEntity) {
               soundEntity.components.sound.playSound();
             }
           });
 
-          // Stop audio when target is lost
           target.addEventListener('targetLost', () => {
+            console.log("Target Lost: Stopping Audio"); // Debug message
             const soundEntity = document.querySelector('#soundEntity');
             if (soundEntity) {
               soundEntity.components.sound.stopSound();
             }
           });
         }
+      });
+
+      // COMPONENT 2: Audio "Unlocker" for Mobile Browsers
+      // This ensures audio is ready to play as soon as the user touches the screen
+      document.addEventListener('DOMContentLoaded', function() {
+        const sceneEl = document.querySelector('a-scene');
+        const audio = document.querySelector('#myAudio');
+        
+        // Listen for a click/tap anywhere on the screen
+        const unlockAudio = () => {
+          if (audio) {
+            audio.play();
+            audio.pause();
+            audio.currentTime = 0;
+            console.log("Audio Engine Unlocked");
+          }
+          document.body.removeEventListener('click', unlockAudio);
+          document.body.removeEventListener('touchstart', unlockAudio);
+        };
+
+        document.body.addEventListener('click', unlockAudio);
+        document.body.addEventListener('touchstart', unlockAudio);
       });
     </script>
   </head>
@@ -76,7 +98,7 @@
       
       <a-assets>
         <a-asset-item id="myModel" src="./model.glb"></a-asset-item>
-        <audio id="myAudio" src="./audio.mp3" preload="auto"></audio>
+        <audio id="myAudio" src="./audio.m4a" preload="auto"></audio>
       </a-assets>
 
       <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
@@ -86,17 +108,20 @@
         <a-gltf-model 
             src="#myModel" 
             rotation="0 0 0" 
-            position="0 0 0" 
-            scale="0.1 0.1 0.1" 
+            position="0 -0.5 0" 
+            scale="0.07 0.07 0.07" 
             animation="property: position; to: 0 0.1 0; dur: 1000; easing: easeInOutQuad; loop: true; dir: alternate">
         </a-gltf-model>
 
-        <a-entity id="soundEntity" sound="src: #myAudio; poolSize: 1; autoplay: false; loop: false"></a-entity>
+        <a-entity id="soundEntity" 
+                  sound="src: #myAudio; autoplay: false; loop: false; positional: false; volume: 1">
+        </a-entity>
 
       </a-entity>
     </a-scene>
   </body>
 </html>
+
 
 
 
